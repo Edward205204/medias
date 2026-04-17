@@ -16,6 +16,8 @@ import searchRouter from './routes/search.routes';
 import conversationsRouter from './routes/conversations.routes';
 import { createServer } from 'http';
 import { initSocket } from './utils/socket';
+import helmet from 'helmet';
+import { limiter } from './utils/limiter';
 // import './utils/fake';
 
 config();
@@ -26,7 +28,9 @@ const PORT = process.env.PORT || 4000;
 initSocket(httpServer);
 
 initFolder();
+app.use(helmet());
 app.use(cors());
+app.use(limiter);
 app.use(express.json());
 app.use('/users', usersRouter);
 app.use('/tweets', tweetsRouter);
