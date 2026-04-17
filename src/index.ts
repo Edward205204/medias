@@ -1,5 +1,5 @@
 import express from 'express';
-import databaseService from '~/services/databases.services';
+
 import usersRouter from '~/routes/users.routes';
 import { defaultErrorHandler } from './middlewares/error.middlewares';
 import mediasRouter from './routes/medias.routes';
@@ -18,6 +18,7 @@ import { createServer } from 'http';
 import { initSocket } from './utils/socket';
 import helmet from 'helmet';
 import { limiter } from './utils/limiter';
+import { connectDb } from './utils/db.connect';
 // import './utils/fake';
 
 config();
@@ -49,16 +50,7 @@ app.use('/static/videos', express.static(UPLOAD_VIDEOS_DIR));
  */
 app.use(defaultErrorHandler);
 
-databaseService
-  .connect()
-  .then(() => {
-    databaseService.indexUsers();
-    databaseService.indexRefreshTokens();
-    databaseService.indexFollows();
-    databaseService.indexVideoEncodes();
-    databaseService.indexTweets();
-  })
-  .catch(console.dir);
+connectDb();
 
 httpServer.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

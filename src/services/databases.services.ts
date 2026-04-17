@@ -20,9 +20,7 @@ class Databases {
   private client = new MongoClient(uri);
   private db: Db;
   constructor() {
-    this.client = new MongoClient(uri);
     this.db = this.client.db(process.env.DB_NAME as string);
-    this.connect();
   }
   async connect() {
     try {
@@ -34,40 +32,53 @@ class Databases {
     }
   }
 
+  async initIndexes() {
+    await Promise.all([
+      this.indexUsers(),
+      this.indexRefreshTokens(),
+      this.indexFollows(),
+      this.indexVideoEncodes(),
+      this.indexTweets()
+    ]);
+  }
+
   async indexUsers() {
     const isExist = await this.users.indexExists(['username_1', 'email_1']);
-
     if (isExist) return;
-    this.users.createIndex({ username: 1 }, { unique: true });
-    this.users.createIndex({ email: 1 }, { unique: true });
+    await Promise.all([
+      this.users.createIndex({ username: 1 }, { unique: true }),
+      this.users.createIndex({ email: 1 }, { unique: true })
+    ]);
   }
 
   async indexRefreshTokens() {
     const isExist = await this.refresh_tokens.indexExists(['refresh_token_1', 'exp_1']);
 
     if (isExist) return;
-    this.refresh_tokens.createIndex({ refresh_token: 1 });
-    this.refresh_tokens.createIndex({ exp: 1 }, { expireAfterSeconds: 0 });
+    await Promise.all([
+      this.refresh_tokens.createIndex({ refresh_token: 1 }),
+      this.refresh_tokens.createIndex({ exp: 1 }, { expireAfterSeconds: 0 })
+    ]);
   }
 
   async indexFollows() {
     const isExist = await this.follows.indexExists(['user_id_1_followed_user_id_1']);
 
     if (isExist) return;
-    this.follows.createIndex({ user_id: 1, followed_user_id: 1 }, { unique: true });
+    await this.follows.createIndex({ user_id: 1, followed_user_id: 1 }, { unique: true });
   }
 
   async indexTweets() {
     const isExist = await this.tweets.indexExists(['content_text']);
     if (isExist) return;
-    this.tweets.createIndex({ content: 'text' }, { default_language: 'none' });
+    await this.tweets.createIndex({ content: 'text' }, { default_language: 'none' });
   }
 
   async indexVideoEncodes() {
     const isExist = await this.video_encodes.indexExists(['video_id_1']);
 
     if (isExist) return;
-    this.video_encodes.createIndex({ video_id: 1 }, { unique: true });
+    await this.video_encodes.createIndex({ video_id: 1 }, { unique: true });
   }
 
   // các method get dùng để gọi các collection khác nhau trong cùng 1 database
