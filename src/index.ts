@@ -50,9 +50,20 @@ app.use('/static/videos', express.static(UPLOAD_VIDEOS_DIR));
  */
 app.use(defaultErrorHandler);
 
-connectDb();
+// ----
 
-httpServer.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-// Dùng socket.io để tạo realtime chat
+const bootstrap = async () => {
+  try {
+    await connectDb();
+
+    httpServer.listen(PORT, () => {
+      console.log(`Database connected & Indexes initialized`);
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+bootstrap();
