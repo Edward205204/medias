@@ -14,7 +14,7 @@ import Conversation from '~/models/schemas/Conversation.schema';
 dotenv.config();
 
 // const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xbg5c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.xbg5c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.9htkwru.mongodb.net/?appName=Cluster0`;
 
 class Databases {
   private client = new MongoClient(uri);
@@ -43,8 +43,6 @@ class Databases {
   }
 
   async indexUsers() {
-    const isExist = await this.users.indexExists(['username_1', 'email_1']);
-    if (isExist) return;
     await Promise.all([
       this.users.createIndex({ username: 1 }, { unique: true }),
       this.users.createIndex({ email: 1 }, { unique: true })
@@ -52,9 +50,6 @@ class Databases {
   }
 
   async indexRefreshTokens() {
-    const isExist = await this.refresh_tokens.indexExists(['refresh_token_1', 'exp_1']);
-
-    if (isExist) return;
     await Promise.all([
       this.refresh_tokens.createIndex({ refresh_token: 1 }),
       this.refresh_tokens.createIndex({ exp: 1 }, { expireAfterSeconds: 0 })
@@ -62,22 +57,14 @@ class Databases {
   }
 
   async indexFollows() {
-    const isExist = await this.follows.indexExists(['user_id_1_followed_user_id_1']);
-
-    if (isExist) return;
     await this.follows.createIndex({ user_id: 1, followed_user_id: 1 }, { unique: true });
   }
 
   async indexTweets() {
-    const isExist = await this.tweets.indexExists(['content_text']);
-    if (isExist) return;
     await this.tweets.createIndex({ content: 'text' }, { default_language: 'none' });
   }
 
   async indexVideoEncodes() {
-    const isExist = await this.video_encodes.indexExists(['video_id_1']);
-
-    if (isExist) return;
     await this.video_encodes.createIndex({ video_id: 1 }, { unique: true });
   }
 
